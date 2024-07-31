@@ -6,7 +6,7 @@ from firebase_admin import firestore
 
 app = Flask(__name__)
 
-cred = credentials.Certificate('C:/Users/SIVA/Utrackk/webpage/utrackk-ee8ab-firebase-adminsdk-6n9l5-15d8827dcb.json')
+cred = credentials.Certificate('utrackk-ee8ab-firebase-adminsdk-6n9l5-15d8827dcb.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
