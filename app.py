@@ -67,11 +67,14 @@ def account_added():
                 'password': password
             })
             return jsonify({"success": True, "user_id": user.uid})
+        except auth.AuthError as e:
+            print(f"Authentication Error: {str(e)}")
+            return jsonify({"message": "Authentication error", "details": str(e)}), 401
         except Exception as e:
-            # Log detailed error
-            print(f"Error: {str(e)}")
-            return jsonify({"message": str(e)}), 500
+            print(f"General Error: {str(e)}")
+            return jsonify({"message": "Internal server error", "details": str(e)}), 500
     return render_template('sign_up.html')
+
 
 # enter name page
 @app.route('/enter_name/<string:user_id>')
