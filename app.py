@@ -68,6 +68,8 @@ def account_added():
             })
             return jsonify({"success": True, "user_id": user.uid})
         except Exception as e:
+            # Log detailed error
+            print(f"Error: {str(e)}")
             return jsonify({"message": str(e)}), 500
     return render_template('sign_up.html')
 
