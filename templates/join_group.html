@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<title>Join Group</title>
+<style>
+    body {
+        font-family: "Ubuntu", sans-serif;
+        background: rgb(47,180,191);
+        background: linear-gradient(90deg, rgba(47,180,191,1) 0%, rgba(20,66,102,1) 100%);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        text-align: center;
+        color: #203647;
+    }
+
+    .container {
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 90%;
+        max-width: 600px;
+        margin-top: 20px;
+        animation: fadein 1s;
+    }
+
+    @keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #203647;
+    }
+
+    .search-bar {
+        display: flex;
+        margin-bottom: 20px;
+    }
+
+    .search-bar input[type="text"] {
+        width: 80%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px 0 0 5px;
+        font-size: 16px;
+    }
+
+    .search-bar button {
+        width: 20%;
+        padding: 10px;
+        border: none;
+        background-color: #4da8da;
+        color: #fff;
+        border-radius: 0 5px 5px 0;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .search-bar button:hover {
+        background-color: #4da8da;
+    }
+
+    .results {
+        margin-top: 20px;
+    }
+
+    .result-block {
+        background-color: #fff;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .result-block:hover {
+        background-color: #f0f8ff;
+    }
+
+    .join-btn {
+        background-color: green;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        width: 80px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .join-btn:hover {
+        background-color: darkgreen;
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 10px;
+        }
+        .join-btn {
+        background-color: green;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        width: 60px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+        .search-bar input[type="text"] {
+            width: 70%;
+        }
+
+        .search-bar button {
+            width: 30%;
+        }
+    }
+    .loading-screen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        justify-content: center;
+        align-items: center;
+        animation: fadeOut 2s ease forwards; /* Fade out animation */
+    }
+
+    .loader {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .loader div {
+        width: 20px;
+        height: 20px;
+        background-color: #fff; /* Dot color */
+        border-radius: 50%;
+        animation: bounce 0.6s infinite ease-in-out alternate; /* Dot animation */
+    }
+
+    .loader div:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    .loader div:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+
+    .loader div:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes bounce {
+        to {
+            transform: translateY(-30px);
+        }
+    }
+    #back{
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 16px;
+        display: block;
+        font-family: "Ubuntu", sans-serif;
+        color: #203647;
+        padding: 5px 10px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <button onclick="goBack()" id = "back"><<</button>
+    <h2>Join Group</h2>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search group name...">
+        <button onclick="searchGroup()" id = "search">Search</button>
+    </div>
+    <div class="results" id="results"></div>
+</div>
+
+<div id = "loading-screen" class="loading-screen">
+    <div class="loader">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+
+<script>
+    function searchGroup() {
+        document.getElementById('loading-screen').style.display = "flex";
+        const query = document.getElementById('searchInput').value;
+        fetch('/search-group', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Clear previous results
+            if (data.length === 0) {
+                const notFoundMessage = document.createElement('p');
+                notFoundMessage.textContent = 'No group found!';
+                document.getElementById('loading-screen').style.display = "none";
+                resultsDiv.appendChild(notFoundMessage);
+            } else {data.forEach(group => {
+                const block = document.createElement('div');
+                block.className = 'result-block';
+                block.innerHTML = `
+                    <span>${group.name} (${group.count} members)</span>
+                    <button class="join-btn" id = "join" onclick="joinGroup('${group.name}')">Join</button>
+                `;
+                resultsDiv.appendChild(block);
+            });
+            document.getElementById('loading-screen').style.display = "none";
+        }
+        })
+        .catch(error => {console.error('Error:', error);document.getElementById('loading-screen').style.display = "none";});
+        
+    }
+
+    function joinGroup(groupName) {
+        document.getElementById('loading-screen').style.display = "flex";
+        fetch('/add_group/{{user_id}}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ groupName , }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('loading-screen').style.display = "none";
+                Swal.fire({
+                icon: 'success',
+                title: 'Successfully Joined',
+                text: 'You can view the group in Your group section'
+                });
+            } else {
+                document.getElementById('loading-screen').style.display = "none";
+                Swal.fire({
+                icon: 'error',
+                title: 'Failed to Join!',
+                text: 'You are already Joined in this group'
+                });
+            }
+        })
+        .catch(error => {console.error('Error:', error);document.getElementById('loading-screen').style.display = "none";});
+        
+    }
+    function goBack() {
+    window.history.back();
+    }
+</script>
+
+</body>
+</html>

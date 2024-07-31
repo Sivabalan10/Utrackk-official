@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group Details</title>
+<style>
+    body {
+        font-family: "Ubuntu", sans-serif;
+        background: rgb(47,180,191);
+        background: linear-gradient(90deg, rgba(47,180,191,1) 0%, rgba(20,66,102,1) 100%);
+        margin: 0;
+        padding: 0;
+        color: #203647;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    h2 {
+        margin-top: 50px;
+        text-align: center;
+        font-weight: bold;
+        color: #fff;
+    }
+    .member-block {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    .member-name {
+        font-weight: bold;
+    }
+    .availability {
+        color: green;
+    }
+    .availability.unavailable {
+        color: red;
+    }
+    .change-btn {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #203647;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        max-width: 200px;
+        margin: 10px auto;
+    }
+    .leave-btn {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #ff3333;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    @media (max-width: 600px) {
+        .container {
+            padding: 10px;
+        }
+        .change-btn, .leave-btn {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+    .loading-screen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        justify-content: center;
+        align-items: center;
+        animation: fadeOut 2s ease forwards; /* Fade out animation */
+    }
+
+    .loader {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .loader div {
+        width: 20px;
+        height: 20px;
+        background-color: #fff; /* Dot color */
+        border-radius: 50%;
+        animation: bounce 0.6s infinite ease-in-out alternate; /* Dot animation */
+    }
+
+    .loader div:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    .loader div:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+
+    .loader div:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes bounce {
+        to {
+            transform: translateY(-30px);
+        }
+    }
+    #back{
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 16px;
+        background-color: #ccc;
+        font-family: "Ubuntu", sans-serif;
+        color: #203647;
+        padding: 13px 30px;
+        margin:0 auto;
+        justify-content: center;
+        display: flex;
+    }
+</style>
+</head>
+<body>
+    <h2>{{grp_name}}</h2>
+<div class="container">
+    <!-- Member Blocks will be added dynamically here -->
+</div>
+<button class="leave-btn" onclick="leaveGroup()">Leave Group</button>
+<button onclick="goBack()" id = "back">Back</button>
+<div id = "loading-screen" class="loading-screen">
+    <div class="loader">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+
+<script> 
+    const collection_name = '{{grp_name}}';
+    const userEmail = '{{user_email}}';
+    document.getElementById('loading-screen').style.display = "flex";
+    function createMemberBlock(member, isCurrentUser) {
+        const container = document.querySelector('.container');
+        const memberBlock = document.createElement('div');
+        memberBlock.classList.add('member-block');
+
+        if (isCurrentUser) {
+            const youLabel = document.createElement('div');
+            youLabel.textContent = 'You';
+            youLabel.style.fontWeight = 'bold';
+            memberBlock.appendChild(youLabel);
+        }
+
+        const nameElement = document.createElement('div');
+        nameElement.classList.add('member-name');
+        nameElement.textContent = member.utrackk_name;
+
+        const availabilityElement = document.createElement('div');
+        availabilityElement.textContent = member.availability ? '(Available)' : '(Not Available)';
+        availabilityElement.classList.add('availability');
+        if (!member.availability) {
+            availabilityElement.classList.add('unavailable');
+        }
+
+        const venueElement = document.createElement('div');
+        venueElement.textContent = 'Venue: ' + member.venue;
+
+        memberBlock.appendChild(nameElement);
+        memberBlock.appendChild(document.createElement('br'));
+        memberBlock.appendChild(availabilityElement);
+        memberBlock.appendChild(document.createElement('br'));
+        memberBlock.appendChild(venueElement);
+
+        if (isCurrentUser) {
+            const changeAvailabilityBtn = document.createElement('button');
+            changeAvailabilityBtn.textContent = 'Change Availability';
+            changeAvailabilityBtn.classList.add('change-btn');
+            changeAvailabilityBtn.onclick = () => updateAvailability(member.email);
+
+            const changeVenueBtn = document.createElement('button');
+            changeVenueBtn.textContent = 'Change Venue';
+            changeVenueBtn.classList.add('change-btn');
+            changeVenueBtn.onclick = () => updateVenue(member.email);
+
+            
+            memberBlock.appendChild(changeAvailabilityBtn);
+            
+            memberBlock.appendChild(changeVenueBtn);
+        }
+
+        if (isCurrentUser) {
+            container.insertBefore(memberBlock, container.firstChild);
+        } else {
+            container.appendChild(memberBlock);
+        }
+        document.getElementById('loading-screen').style.display = "none";
+    }
+
+    function updateAvailability(email) {
+        document.getElementById('loading-screen').style.display = "flex";
+        fetch(`/update-availability/${collection_name}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('loading-screen').style.display = "none";
+                location.reload();
+            } else {
+                document.getElementById('loading-screen').style.display = "none";
+                alert('Error updating availability.');
+            }
+        })
+        .catch(error => {console.error('Error:', error);document.getElementById('loading-screen').style.display = "none";});
+    }
+
+    function updateVenue(email) {
+        const newVenue = prompt('Enter new venue:');
+        document.getElementById('loading-screen').style.display = "flex";
+        if (newVenue) {
+            fetch(`/update-venue/${collection_name}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, venue: newVenue }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('loading-screen').style.display = "none";
+                    location.reload();
+                } else {
+                    document.getElementById('loading-screen').style.display = "none";
+                    alert('Error updating venue.');
+                }
+            })
+            .catch(error => {console.error('Error:', error);document.getElementById('loading-screen').style.display = "none";});
+        }
+        document.getElementById('loading-screen').style.display = "none";
+    }
+
+    function leaveGroup() {
+        document.getElementById('loading-screen').style.display = "flex";
+        fetch(`/leave-group/${collection_name}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: userEmail }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('loading-screen').style.display = "none";
+                alert('You have left the group.');
+                window.location.href = '/'; 
+            } else {
+                document.getElementById('loading-screen').style.display = "none";
+                alert('Error leaving group.');
+            }
+        })
+        .catch(error => {console.error('Error:', error);document.getElementById('loading-screen').style.display = "none";});
+    }
+
+    fetch(`/view-group-details/${collection_name}/${userEmail}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(member => {
+                const isCurrentUser = member.email === userEmail;
+                createMemberBlock(member, isCurrentUser);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+        function goBack() {
+    window.history.back();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homepage</title>
+<style>
+    body {
+        font-family: "Ubuntu", sans-serif;
+        background: rgb(47,180,191);
+        background: linear-gradient(90deg, rgba(47,180,191,1) 0%, rgba(20,66,102,1) 100%);
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Navigation Bar */
+    .navbar {
+        background-color: #203647;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 20px;
+        box-shadow: 6px 4px 5px #203647;
+    }
+
+    .navbar-brand {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 50px;
+        right: 20px;
+        background-color: #203647;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        border: 2px solid white;
+    }
+
+    .nav-links a {
+        color: #fff;
+        text-decoration: none;
+        padding: 5px 0;
+        transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover {
+        background-color: #4da8da;
+        padding: 3px;
+    }
+
+    /* Main Content */
+    .main-content {
+        padding: 20px;
+        margin-bottom: 15%;
+        margin-top: 4%;
+        color: #203647;
+    }
+    h2{
+        text-align: center;
+    }
+    .block {
+        background-color: #fff;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        width: 60%;
+        margin:0 auto 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    .block:hover{
+        width: 61%;
+    }
+    @media screen and (max-width: 480px) {
+    .main-content {
+        padding: 20px;
+        margin-bottom: 15%;
+        margin-top: 10%;
+        color: #203647;
+    }
+    .block {
+        background-color: #fff;
+        padding: 2px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        width: 70%;
+        margin:0 auto 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    .block:hover{
+        width: 71%;
+    }
+    }
+    /* Footer */
+    footer {
+        background-color: #203647;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<div class="navbar">
+    <div class="navbar-brand">
+        <span>UTRACKK.com</span>
+    </div>
+    <div class="dropdown">
+        <span onclick="toggleNavLinks()">Menu &#9662;</span>
+        <div class="nav-links" id="navLinks">
+            <a href="/group_joined/{{user_id}}">Availability Check</a>
+            <a href="/complaint_box/{{utrackk_name}}">Complaint Box</a>
+            <a href="#">Your Profile</a>
+            <a href="#">Contact Us</a>
+            <a href="/">Logout</a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <h1 style="color: #fff;text-align: center;">Welcome {{utrackk_name}}!</h1>
+    <a href="/group_joined/{{user_id}}" style="text-decoration: none;color: #203647 "><div class="block">
+        <h2>Your Group</h2>
+    </div></a>
+    <a href="/join_group/{{user_id}}" style="text-decoration: none;color: #203647 "><div class="block">
+        <h2>Join Group</h2>
+    </div></a>
+    <a href="/create_group/{{user_id}}" style="text-decoration: none;color: #203647 "><div id="dynamic-content"></div></a>
+</div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <p>Terms and Conditions | Contact Us | All Rights Reserved</p>
+</footer>
+
+<script>
+    var role = '{{role}}';
+    function toggleNavLinks() {
+        var navLinks = document.getElementById("navLinks");
+        if (navLinks.style.display === "flex") {
+            navLinks.style.display = "none";
+        } else {
+            navLinks.style.display = "flex";
+        }
+    }
+    function createDynamicBlock() {
+        var dynamicContent = document.getElementById("dynamic-content");
+        var block = document.createElement("div");
+        block.className = "block";
+        block.innerHTML = "<h2>Create Group</h2>";
+        dynamicContent.appendChild(block);
+    }
+
+    if (role === 'staff') {
+        createDynamicBlock();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<title>Signup Page</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Ubuntu", sans-serif;
+        background: rgb(47,180,191);
+        background: linear-gradient(90deg, rgba(47,180,191,1) 0%, rgba(20,66,102,1) 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    
+    .container {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 1px 3px 4px grey;
+        max-width: 320px;
+        width: 100%;
+        text-align: center;
+        animation: fadeIn 1s ease;
+    }
+    
+    h2 {
+        color: #203647;
+        margin-bottom: 20px;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+        width: calc(100% - 20px);
+        padding: 14px;
+        margin-bottom: 20px;
+        border: 1px solid #333333;
+        border-radius: 7px;
+        box-sizing: border-box;
+    }
+    
+    button{
+        background-color: #4da8da;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-family: "Ubuntu", sans-serif;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    button:hover {
+        background-color: #144266;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .container {
+            max-width: 300px;
+        }
+        body{
+            height: 85vh;
+        }
+    }
+
+    .loading-screen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        justify-content: center;
+        align-items: center;
+        animation: fadeOut 2s ease forwards; /* Fade out animation */
+    }
+
+    .loader {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .loader div {
+        width: 20px;
+        height: 20px;
+        background-color: #fff; /* Dot color */
+        border-radius: 50%;
+        animation: bounce 0.6s infinite ease-in-out alternate; /* Dot animation */
+    }
+
+    .loader div:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    .loader div:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+
+    .loader div:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes bounce {
+        to {
+            transform: translateY(-30px);
+        }
+    }
+
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Signup</h2>
+    <form action="#" method="post" onsubmit="return validateForm()">
+        <input type="text" name="username" id="mail" placeholder="College mail" required>
+        <br>
+        <input type="password" name="password" id="password" placeholder="Password" required>
+        <br>
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" required>
+        <br>
+        <button type="button" onclick="validateForm()">Submit</button>
+    </form>
+    
+    <p style="color:#333333">Already have an account? <a href="/">Login</a></p>
+    <hr>
+    <h4 style="color: grey;">Powered By Utrackk</h4>
+</div>
+
+<div id = "loading-screen" class="loading-screen">
+    <div class="loader">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+
+<script>
+    function validateForm() {
+        document.getElementById('loading-screen').style.display = "flex";
+        var email = document.getElementById("mail").value;
+        var password = document.getElementById("password").value;
+        var confirm_password = document.getElementById("confirm_password").value;
+        if (email == "" && password == "" && confirm_password == ""){
+            document.getElementById('loading-screen').style.display = "none";
+            swal.fire({
+                icon: 'error',
+                title: 'Invalid input',
+                text: 'Empty field cannot be taken'
+            });
+            return;
+        }
+        if (password !== confirm_password) {
+            document.getElementById('loading-screen').style.display = "none";
+            Swal.fire({
+                icon: 'error',
+                title: 'Password Mismatch',
+                text: 'The passwords do not match.'
+            });
+            return;
+        }
+
+        fetch('/sign_up/account_added', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({email: email, password: password}),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('loading-screen').style.display = "none";
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sign Up Successful!',
+                    text: 'Redirecting to login page...',
+                    showConfirmButton: false
+                });
+                setTimeout(function() {window.location.href = '/enter_name'+'/'+data.user_id;}, 2000);
+            } else {
+                document.getElementById('loading-screen').style.display = "none";
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Sign Up Failed',
+                    text: 'Username already exists. Please choose a different username.',
+                });
+            }
+        })
+        .catch((error) => {
+            document.getElementById('loading-screen').style.display = "none";
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong! Please try again later.',
+            });
+        });
+}
+
+</script>
+</body>
+</html>

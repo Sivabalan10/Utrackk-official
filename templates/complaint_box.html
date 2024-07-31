@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<title>Complaint Box</title>
+<style>
+    body {
+        font-family: "Ubuntu", sans-serif;
+        background: rgb(47,180,191);
+        background: linear-gradient(90deg, rgba(47,180,191,1) 0%, rgba(20,66,102,1) 100%);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 85vh;
+    }
+
+    .container {
+        color: #fff;
+        border-radius: 10px;
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        animation: fadein 1s;
+    }
+
+    @keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    h2 {
+        margin-bottom: 30px;
+        color: #fff;
+        font-size: 2.1em;
+    }
+
+    input[type="text"],
+    textarea {
+        font-family: "Ubuntu", sans-serif;
+        width: 100%;
+        padding: 18px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 16px;
+        background-color: rgba(255, 255, 255, 0.7); 
+    }
+
+    input[type="text"]::placeholder,
+    textarea::placeholder {
+        color: #203647;
+        font-family: "Ubuntu", sans-serif; 
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #4da8da; 
+    }
+
+    textarea {
+        font-family: "Ubuntu", sans-serif;
+        resize: vertical; 
+        height: 200px; /* Increased height for a larger complaint message */
+    }
+
+    button {
+        background-color: #203647;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 17px 25px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 16px;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #4da8da;
+    }
+
+    @media screen and (max-width: 480px) {
+        .container {
+            padding: 20px;
+        }
+        body{
+            min-height: 80vh;
+        }
+        h2 {
+        margin-bottom: 30px;
+        color: #fff;
+        font-size: 1.9em;
+        }
+        .container {
+        color: #fff;
+        border-radius: 10px;
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        animation: fadein 1s;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.7); /* Slightly transparent background */
+        }
+
+    }
+    .loading-screen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        justify-content: center;
+        align-items: center;
+        animation: fadeOut 2s ease forwards; /* Fade out animation */
+    }
+
+    .loader {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .loader div {
+        width: 20px;
+        height: 20px;
+        background-color: #fff; /* Dot color */
+        border-radius: 50%;
+        animation: bounce 0.6s infinite ease-in-out alternate; /* Dot animation */
+    }
+
+    .loader div:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    .loader div:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+
+    .loader div:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes bounce {
+        to {
+            transform: translateY(-30px);
+        }
+    }
+    #back{
+        
+        background-color: #ccc;
+        font-family: "Ubuntu", sans-serif;
+        color: #203647;
+        padding: 13px 30px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Submit a Complaint as "{{name}}"</h2>
+    <form>
+        <input type="text" id="complaint_subject" name="subject" placeholder="Complaint Subject" required><br>
+        <textarea name="complaint_message" id="complaint_message" placeholder="Enter your complaint..." required></textarea><br>
+        <button type="button" onclick="submitComplaint()">Submit Complaint</button>
+    </form>
+    <br>
+    <button onclick="goBack()" id = "back">Back</button>
+</div>
+
+<div id="loading-screen" class="loading-screen">
+    <div class="loader">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+    function submitComplaint(){
+        document.getElementById('loading-screen').style.display = "flex";
+        const complaintSubject = document.getElementById('complaint_subject').value;
+        const complaintMessage = document.getElementById('complaint_message').value;
+        
+        fetch('/submit_complaint', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                subject: complaintSubject,
+                message: complaintMessage
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('loading-screen').style.display = "none";
+                Swal.fire({
+                        icon: 'success',
+                        title: 'Complaint Submitted!',
+                        text: 'Thank you for reaching out. We will look into the matter.',
+                    });
+            } else {
+                document.getElementById('loading-screen').style.display = "none";
+                Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to Submit Complaint',
+                        text: 'Failed to submit the complaint. Please try again later.',
+                    });
+            }
+        })
+        .catch((error) => {
+            document.getElementById('loading-screen').style.display = "none";
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Something went wrong!',
+                text: 'Oops, there was a problem submitting your complaint. Please try again later.',
+            });
+        });
+    }
+</script>
+</body>
+</html>
